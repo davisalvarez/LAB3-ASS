@@ -289,11 +289,12 @@ main:
 	b inicio
 	
 .data
-.global pixelAddr, halconX
+.global myloc
+myloc: .word 0
+.global pixelAddr, halconX, formatoD, nave
 pixelAddr: .word 0
-
 halconX: .word 500
-
+nave: .word 0
 formatoD: .asciz "%d \n"
 
 /***************************************************************************/
@@ -334,6 +335,54 @@ GetGpio:
 
 	pop {r5-r8}
 	pop {pc}
+
+.global SetGpioFunction
+SetGpioFunction:
+    pinNum .req r0
+    pinFunc .req r1
+	cmp pinNum,#53
+	cmpls pinFunc,#7
+	movhi pc,lr
+
+	push {lr}
+	mov r2,pinNum
+	.unreq pinNum
+	pinNum .req r2
+	@bl GetGpioAddress no se llama la funcion sino
+	ldr r6, =myloc
+ 	ldr r0, [r6] @ obtener direccion 	
+	gpioAddr .req r0
+
+	functionLoop$:
+		cmp pinNum,#9
+		subhi pinNum,#10
+		addhi gpioAddr,#4
+		bhi functionLoop$
+
+	add pinNum, pinNum,lsl #1
+	lsl pinFunc,pinNum
+
+	mask .req r3
+	mov mask,#7					/* r3 = 111 in binary */
+	lsl mask,pinNum				/* r3 = 11100..00 where the 111 is in the same position as the function in r1 */
+	.unreq pinNum
+
+	mvn mask,mask				/* r3 = 11..1100011..11 where the 000 is in the same poisiont as the function in r1 */
+	oldFunc .req r2
+	ldr oldFunc,[gpioAddr]		/* r2 = existing code */
+	and oldFunc,mask			/* r2 = existing code with bits for this pin all 0 */
+	.unreq mask
+
+	orr pinFunc,oldFunc			/* r1 = existing code with correct bits set */
+	.unreq oldFunc
+
+	str pinFunc,[gpioAddr]
+	.unreq pinFunc
+	.unreq gpioAddr
+	pop {pc}
 	
+
 /***************************************************************************/
+
+
 
