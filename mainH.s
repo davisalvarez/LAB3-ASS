@@ -23,7 +23,14 @@ main:
 	ldr r1,=halconX
 	str r0,[r1]
 	
+	@se pone el pin 18 como entrada para el boton
+
+	mov r0,#18
+	mov r1,#0
+	bl SetGpioFunction
+	
 	inicio:
+	
 	push {r0-r12}
 	ldr r0,=formatoD
 	ldr r1,=halconX
@@ -35,6 +42,12 @@ main:
 	//ldr r0,=pixelAddr 
 	bl pintarFondo			//Pinta el fondo
 	pop {r0-r12}
+
+
+
+	@si esta en 10 el contador lo regresa a 1 	
+	cmp r4,#10
+	moveq r4,#1	
 	
 	render1:
 		
@@ -85,6 +98,9 @@ main:
 				add xPos,#1 
 				
 				b drawPixel1
+				
+			
+		
 		end1:	
 			// aumentamos y
 			add y,#1
@@ -101,16 +117,17 @@ main:
 		
 		push {r0-r12}
 	bl pintarFondo			//Pinta el fondo
-	ldr r0,=halconX
+	bl boton
+	/*ldr r0,=halconX
 		ldr r0,[r0]
-		add r0,#50
+		add r0,#10
 	ldr r1,=halconX
 	str r0,[r1]
 	
 	ldr r0,=formatoD
 	ldr r1,=halconX
 	ldr r1,[r1]
-	bl printf
+	bl printf*/
 	pop {r0-r12}
 	
 	
@@ -132,6 +149,7 @@ main:
 			ldr r12, =halconX
 			ldr xPos,[r12] //820
 			drawPixel2:
+			
 				cmp x,ancho				//comparar x con el ancho de la imagen
 				bge end2
 				
@@ -170,16 +188,18 @@ main:
 	
 	push {r0-r12}
 	bl pintarFondo			//Pinta el fondo
-	ldr r0,=halconX
+	bl boton
+	
+	/*ldr r0,=halconX
 	ldr r0,[r0]
-		add r0,#50
+		add r0,#10
 	ldr r1,=halconX
 	str r0,[r1]		
 	
 	ldr r0,=formatoD
 	ldr r1,=halconX
 	ldr r1,[r1]
-	bl printf
+	bl printf*/
 	
 	pop {r0-r12}
 						
@@ -237,16 +257,17 @@ main:
 			
 	push {r0-r12}
 	bl pintarFondo			//Pinta el fondo
-	ldr r0,=halconX
+	bl boton
+	/*ldr r0,=halconX
 	ldr r0,[r0]
-		add r0,#50
+		add r0,#10
 	ldr r1,=halconX
 	str r0,[r1]
 	
 	ldr r0,=formatoD
 	ldr r1,=halconX
 	ldr r1,[r1]
-	bl printf
+	bl printf*/
 	
 	pop {r0-r12}
 	
@@ -268,11 +289,32 @@ main:
 	b inicio
 	
 .data
-.global pixelAddr, halconX, nave, formatoD
+.global pixelAddr, halconX
 pixelAddr: .word 0
 
 halconX: .word 500
-nave:	.word 0
 
 formatoD: .asciz "%d \n"
+
+/***************************************************************************/
+//BOTON
+
+.global boton
+boton:
+	mov r0,#18
+	bl GetGpio
+	cmp r0,#0
+	bne modificar
+	mov r0,#300
+	//bl esperar
+
+	modificar:
+		mov r0,#0
+		ldr r0,=halconX
+		ldr r0,[r0]
+		add r0,#50
+		ldr r1,=halconX
+		str r0,[r1]
+	
+/***************************************************************************/
 
