@@ -90,6 +90,47 @@ SetGpioFunction:
 	.unreq pinFunc
 	.unreq gpioAddr
 	pop {pc}
-	
+
+/* NEW
+* SetGpio sets the GPIO pin addressed by register r0 high if r1 != 0 and low
+* otherwise. 
+* C++ Signature: void SetGpio(u32 gpioRegister, u32 value)
+*/
+.global SetGpio
+SetGpio:	
+    pinNum .req r0
+    pinVal .req r1
+
+	cmp pinNum,#53
+	movhi pc,lr
+	push {lr}
+	mov r2,pinNum	
+    .unreq pinNum	
+    pinNum .req r2
+	@bl GetGpioAddress no se llama la funcion sino
+	ldr r6, =myloc
+ 	ldr r0, [r6] @ obtener direccion 
+    gpioAddr .req r0
+
+	pinBank .req r3
+	lsr pinBank,pinNum,#5
+	lsl pinBank,#2
+	add gpioAddr,pinBank
+	.unreq pinBank
+
+	and pinNum,#31
+	setBit .req r3
+	mov setBit,#1
+	lsl setBit,pinNum
+	.unreq pinNum
+
+	teq pinVal,#0
+	.unreq pinVal
+	streq setBit,[gpioAddr,#40]
+	strne setBit,[gpioAddr,#28]
+	.unreq setBit
+	.unreq gpioAddr
+	pop {pc}
+
 
 /***************************************************************************/
