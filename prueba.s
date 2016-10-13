@@ -1,4 +1,4 @@
- .text
+  .text
  .align 2
  .global main
 main:
@@ -46,6 +46,25 @@ GetGpio:
 	pop {r5-r8}
 	pop {pc}
 
+.global GetGpioAddress
+GetGpioAddress:
+	gpioAddr .req r0
+	push {lr}
+	@ldr gpioAddr,=0x20200000
+	ldr gpioAddr,=0x3F200000 @GPIO base para raspberry 2
+	@modificaciones para utilizar la memoria virtual
+	bl phys_to_virt
+ 	mov r7, r0  @ r7 points to that physical page
+ 	ldr r6, =myloc
+ 	str r7, [r6] @ save this 
+	pop {pc}
+	.unreq gpioAddr
+
+/* NEW
+* SetGpioFunction sets the function of the GPIO register addressed by r0 to the
+* low  3 bits of r1.
+* C++ Signature: void SetGpioFunction(u32 gpioRegister, u32 function)
+*/
 .global SetGpioFunction
 SetGpioFunction:
     pinNum .req r0
@@ -132,5 +151,5 @@ SetGpio:
 	.unreq gpioAddr
 	pop {pc}
 
-
 /***************************************************************************/
+
