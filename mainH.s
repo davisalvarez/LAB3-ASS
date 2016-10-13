@@ -315,6 +315,25 @@ boton:
 		add r0,#50
 		ldr r1,=halconX
 		str r0,[r1]
+.global GetGpio
+GetGpio:
+	push {lr}
+	push {r5-r8}
+	mov r8,r0
+	
+	ldr r6,=myloc
+	ldr r0,[r6]
+	ldr r5,[r0,#0x34]
+	
+	mov r7,#1
+	lsl r7,r8
+	and r5,r5,r7
+	cmp r5,#0
+	moveq r0,#0
+	movgt r0,#1
+
+	pop {r5-r8}
+	pop {pc}
 	
 /***************************************************************************/
 
