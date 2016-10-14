@@ -133,5 +133,58 @@ pintarHalcon:
 	
 		pop {pc}
 	/*****************************************************************************/
+/*****************************************************************/
+pintarEstrella:
+		push {lr}
+		ldr r11,=0
+		str r11,[r12]
+		
+		/*========*/
+		
+				mov countByte,#0 				//Contador que cuenta la cantidad de bytes dibujados
+		ldr ancho,=estrellaAncho
+		ldr ancho,[ancho]
+		ldr alto,=estrellaAlto
+		ldr alto,[alto]
+		ldr y,=0
+		ldr yPos, =ancho
+		//Ciclo que dibuja filas
+		drawRowE:
+			ldr y,=0
+			ldr r12, =estrellaY
+			ldr xPos,[r12] //820
+			drawPixelE:
+				cmp y,alto				//comparar x con el ancho de la imagen
+				bge endE
+				
+				ldr addrPixel,=estrella	//Obtenemos la direccion de la matriz con los colores
+				ldrb colour,[addrPixel,countByte]	//Leer el dato de la matriz.
+				
+				ldr r0,=pixelAddr
+				ldr r0,[r0]
+				
+				ldr r11,=0
+				cmp colour,r11
+				 
+				push {r0-r12}
+				blne pixel			//Dibujamos el pixel. r1=x,r2=y,r3=colour
+				pop {r0-r12}
+				
+				add countByte,#1 		//Incrementamos los bytes dibujados
+				add y,#1 				//Aumenta el contador del ancho de la imagen
+				add yPos,#1 
+				
+				b drawPixelE
+		endE:	
+			// aumentamos y
+			add x,#1
+			add xPos,#1 
+						
+			//Revisamos si ya dibujamos toda la imagen.
+			teq y,alto
+			bne drawRowE
+		
+		/*========*/
+		b finPintarHalcon
 
 .end
